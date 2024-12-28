@@ -1,90 +1,76 @@
-// barkolorious - 03 December 2024
+// barkolorious - 07 December 2024
 // in god, do we trust? 
 #include <bits/stdc++.h>
 using namespace std;
 
 #define FIN(x) freopen(x ".in", "r", stdin)
 #define FOUT(x) freopen(x ".out", "w", stdout)
+#define all(v) (v).begin(), (v).end()
 #define int long long
 #define pb  push_back
+#define sz  size
 #define fr  first
 #define sc  second
 #define __  << " " << 
 
 const int N = 2e5 + 5;
-vector<int> adj[N], radj[N];
-int in_degree[N], par[N], dist[N];
-int n, m;
+const int K = 15;
+vector<pair<int, int>> adj[N];
+priority_queue<int> dist[N];
+int vis[N];
 
 void solve () {
-  cin >> n >> m;
+  int n, m, k; cin >> n >> m >> k;
   for (int i = 0; i < m; i++) {
-    int u, v; cin >> u >> v;
-    adj[u].pb(v);
-    radj[v].pb(u);
-    in_degree[v]++;
-  }
-
-  vector<int> topo;
-  queue<int> q;
-  for (int i = 1; i <= n; i++) {
-    if (in_degree[i] == 0) q.push(i);
-    dist[i] = INT_MIN;
-  }
-
-  while (!q.empty()) {
-    int u = q.front(); q.pop();
-    topo.pb(u);
-    for (int v : adj[u]) {
-      if (--in_degree[v] == 0) q.push(v);
-    }
+    int u, v, w; cin >> u >> v >> w;
+    adj[u].pb({v, w});
   } 
 
-  memset(par, -1, sizeof(par));
-  dist[1] = 0;
-  for (int u : topo) {
-    for (int v : radj[u]) {
-      if (dist[v] + 1 > dist[u]) {
-        dist[u] = dist[v] + 1;
-        par[u] = v;
+  priority_queue<pair<int, int>> pq;
+  pq.push({0, 1});
+  dist[1].push(0);
+
+  while (!pq.empty()) {
+    int u = pq.top().sc, d = -pq.top().fr;
+    pq.pop();
+
+    if (d > dist[u].top()) continue;
+    
+    for (auto edge : adj[u]) {
+      int v = edge.fr, w = edge.sc;
+      if (dist[v].sz() < k) {
+        dist[v].push(d + w);
+        pq.push({-(d + w), v}); 
+      } else if (d + w < dist[v].top()){
+        dist[v].pop();
+        dist[v].push(d + w);
+        pq.push({-(d + w), v});
       }
     }
   }
-
-  if (dist[n] < 0) {
-    cout << "IMPOSSIBLE" << endl;
-    return;
-  } 
-
-  vector<int> route;
-  int ptr = n;
-  while (ptr != 1) {
-    route.pb(ptr);
-    ptr = par[ptr];
-  }
-  route.pb(1);
-  reverse(route.begin(), route.end());
-  cout << route.size() << endl;
-  for (int x : route) cout << x << " ";
-  cout << endl;
+  vector<int> ans;
+  while (dist[n].sz()) { ans.pb(dist[n].top()); dist[n].pop(); }
+  reverse(all(ans));
+  for (int u : ans) cout << u << " ";
+  cout.flush();
 }
 
 /*
 -- Sample 1 --
 Input:
-5 5
-1 2
-2 5
-1 3
-3 4
-4 5
+4 6 3
+1 2 1
+1 3 3
+2 3 2
+2 4 6
+3 2 8
+3 4 1
 Output:
-4
-1 3 4 5
+4 4 7
 */
 
 /*
-g++ -std=c++17 -O2 -Wall -DLOCAL "C:\Users\LENOVO\Desktop\BARKIN\Genel\Programming\Competitive\Questions\CSES\Graph_Algorithms\1680_longest_flight_route.cpp" -o _run
+g++ -std=c++17 -O2 -Wall -DLOCAL "C:\Users\LENOVO\Desktop\BARKIN\Genel\Programming\Competitive\Questions\CSES\Graph_Algorithms\1196_flight_routes.cpp" -o _run
 */
 
 int32_t main () {

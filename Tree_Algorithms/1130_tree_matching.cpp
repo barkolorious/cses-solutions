@@ -12,20 +12,16 @@ using namespace std;
 const int N = 2e5 + 5;
 int n, included[N];
 vector<int> adj[N];
+int ans = 0;
 
-void dfs (int v, int p) {
-  cout << v << " " << p << endl;
-  if (p != -1 && adj[v].size() == 1 && !included[p]) {
-    included[v] = included[p] = true;
-    return;
-  }
-  for (int u : adj[v]) {
-    if (u == p) continue;
-    dfs(u, v);
-  }
-  if (p == -1) return;
-  if (!included[v] && !included[p]) {
-    included[v] = included[p] = true;
+void dfs (int u, int p) {
+  for (int v : adj[u]) {
+    if (v == p) continue;
+    dfs(v, u);
+    if (!included[v] && !included[u]) {
+      included[u] = included[v] = true;
+      ans++;
+    }
   }
 }
 
@@ -36,30 +32,38 @@ void solve () {
     adj[v].pb(u);
     adj[u].pb(v);
   }
-  // dfs(1, -1);
-  stack<pair<int, int>> st;
-  st.push({1, -1});
-  while (!st.empty()) {
-    int v = st.top().fr;
-    int p = st.top().sc;
-    st.pop();
-    if (p != -1 && adj[v].size() == 1 && !included[p]) {
-      included[v] = included[p] = true;
-      continue;
-    }
-    for (int u : adj[v]) {
-      if (u == p) continue;
-      st.push({u, v});
-    }
-    if (p == -1) continue;
-    if (!included[v] && !included[p]) {
-      included[v] = included[p] = true;
-    }
-  }
-  int ans = 0;
-  for (int i = 1; i <= n; i++) ans += included[i];
-  cout << ans / 2 << endl;
+  dfs(1, -1);
+  cout << ans << endl;
 } 
+
+/* Alternate Solution */
+
+// const int N = 2e5 + 5;
+// int n, dp[2][N];
+// vector<int> adj[N];
+
+// void dfs (int u, int p) {
+//   for (int v : adj[u]) {
+//     if (v == p) continue;
+//     dfs(v, u);
+//     dp[0][u] += max(dp[0][v], dp[1][v]);
+//   }
+//   for (int v : adj[u]) {
+//     if (v == p) continue;
+//     dp[1][u] = max(dp[1][u], dp[0][v] + 1 + dp[0][u] - max(dp[0][v], dp[1][v]));
+//   }
+// }
+
+// void solve () {
+//   cin >> n;
+//   for (int i = 1; i < n; i++) {
+//     int v, u; cin >> v >> u;
+//     adj[v].pb(u);
+//     adj[u].pb(v);
+//   }
+//   dfs(1, -1);
+//   cout << max(dp[0][1], dp[1][1]) << endl;
+// } 
 
 /*
 -- Sample 1 --
